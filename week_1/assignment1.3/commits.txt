@@ -1,0 +1,52 @@
+commit 61d2f40249e1bd69250ee5e20e9510a5d2247a1b
+Merge: 7724078 ad4c01a
+Author: husam <mohammad.hussam@xloopdigital.com>
+Date:   Thu Apr 6 04:03:07 2023 +0500
+
+    Resolve conflict: Combine all numbers
+
+commit ad4c01ac6e0a171022ba747660d15eb54ac05b2a
+Author: husam <mohammad.hussam@xloopdigital.com>
+Date:   Thu Apr 6 03:57:37 2023 +0500
+
+    even numbers are added in num.txt
+
+diff --git a/num.txt b/num.txt
+index e69de29..0e0333e 100644
+--- a/num.txt
++++ b/num.txt
+@@ -0,0 +1,5 @@
++2
++4
++6
++8
++10
+\ No newline at end of file
+
+commit 77240789c25a94fda549d65f1a0ad6ffcc2c577d
+Author: husam <mohammad.hussam@xloopdigital.com>
+Date:   Thu Apr 6 03:54:28 2023 +0500
+
+    odd numbers are added in num.txt
+
+diff --git a/num.txt b/num.txt
+index e69de29..7104f42 100644
+--- a/num.txt
++++ b/num.txt
+@@ -0,0 +1,5 @@
++1
++3
++5
++7
++9
+\ No newline at end of file
+
+commit 4f68e0178f4771d0e9c2cf4d5c0be67d180f71c5
+Author: husam <mohammad.hussam@xloopdigital.com>
+Date:   Thu Apr 6 03:51:18 2023 +0500
+
+    initial commit
+
+diff --git a/num.txt b/num.txt
+new file mode 100644
+index 0000000..e69de29
