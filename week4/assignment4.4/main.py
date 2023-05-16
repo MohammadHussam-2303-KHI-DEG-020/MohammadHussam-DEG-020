@@ -1,57 +1,50 @@
-import json
-import logging
 import os
+import logging
+import sqlite3
 
 from flask import Flask, render_template, request
-from logging import StreamHandler
 
-# Problem -  App should be able to be executed both during development, with debugging enabled, and in production, with debugging disabled.
-# Solution - 
 app = Flask(__name__)
-app.debug = os.environ.get("DEBUG") == "1"  # Enable debugging if DEBUG environment variable is set to "1"
+app.config['DEBUG'] = os.environ.get('FLASK_ENV') == 'development'
+app.config['TODO_DB'] = os.environ.get('TODO_DB', 'todo.db')
 
-# Problem 1 - The logs shouldn’t written to a file, but to the container output.
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+stream_handler = logging.StreamHandler()
+logger.addHandler(stream_handler)
 
-# Solution.
-# Logging the logs to container output using streamHandler instead of a log file
+def init_db():
+    with sqlite3.connect(app.config['TODO_DB']) as conn:
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS todo
+                     (content text)''')
+        conn.commit()
 
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-stream_handler = StreamHandler()
-root_logger.addHandler(stream_handler)
+def add_todo_item(item):
+    with sqlite3.connect(app.config['TODO_DB']) as conn:
+        c = conn.cursor()
+        c.execute('INSERT INTO todo VALUES (?)', (item,))
+        conn.commit()
 
+def get_todo_items():
+    with sqlite3.connect(app.config['TODO_DB']) as conn:
+        c = conn.cursor()
+        c.execute('SELECT content FROM todo')
+        todo_items = [item[0] for item in c.fetchall()]
+    return todo_items
 
-TODO_FILE_NAME = "/app/todo_data/todo.json"  #You can change the Path anytime when you want to switch from test to production
-
-if os.path.exists(TODO_FILE_NAME):
-    with open(TODO_FILE_NAME) as f:
-        TODO_ITEMS = json.load(f)
-else:
-    TODO_ITEMS = []
-
+init_db()
 
 @app.route("/", methods=["GET", "POST"])
 def main():
     if request.method == "POST":
         content = request.form["content"]
-        TODO_ITEMS.append(content)
-        # Data is being saved on each hit
-        save_todo_items()
+        add_todo_item(content)
 
-    return render_template("index.html", todo_items=TODO_ITEMS)
+    todo_items = get_todo_items()
 
-# This function saves the list on each call making it stateless instead of periodic saving.
-def save_todo_items():
-    with open(TODO_FILE_NAME, "w") as f:
-        json.dump(TODO_ITEMS, f)
-
-# Checks wheather the app is in debug mode or not.
-if app.debug:
-    app.logger.setLevel(logging.DEBUG)
-    app.logger.debug("Debug mode is enabled.")
-else:
-    app.logger.debug("Debug mode is disabled.")
-
+    return render_template("index.html", todo_items=todo_items)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
