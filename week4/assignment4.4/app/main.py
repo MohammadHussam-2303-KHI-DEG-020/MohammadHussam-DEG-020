@@ -6,12 +6,18 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 app.config['DEBUG'] = os.environ.get('FLASK_ENV') == 'development'
-app.config['TODO_DB'] = os.environ.get('TODO_DB', 'todo.db')
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+# Set the database path based on the environment
+if app.config['DEBUG']:
+    app.config['TODO_DB'] = '/app/data/todo-dev.db'
+else:
+    app.config['TODO_DB'] = '/app/data/todo.db'
+
+# Configure logging to output to the container
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
 stream_handler = logging.StreamHandler()
-logger.addHandler(stream_handler)
+root_logger.addHandler(stream_handler)
 
 def init_db():
     with sqlite3.connect(app.config['TODO_DB']) as conn:
@@ -46,5 +52,5 @@ def main():
     return render_template("index.html", todo_items=todo_items)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
 
