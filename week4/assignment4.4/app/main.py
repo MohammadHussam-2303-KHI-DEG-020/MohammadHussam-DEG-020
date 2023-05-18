@@ -5,19 +5,21 @@ import sqlite3
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
-app.config['DEBUG'] = os.environ.get('FLASK_ENV') == 'development'
-
-# Set the database path based on the environment
-if app.config['DEBUG']:
-    app.config['TODO_DB'] = '/app/data/todo-dev.db'
+if os.environ.get('FLASK_ENV') == 'production':
+    app.config.from_mapping(
+        TODO_DB='/app/todo_data/todo.db',
+        DEBUG=False
+    )
 else:
-    app.config['TODO_DB'] = '/app/data/todo.db'
-
-# Configure logging to output to the container
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
+    app.config.from_mapping(
+        TODO_DB='todo.db',
+        DEBUG=True
+    )
+# configure the logs to output
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 stream_handler = logging.StreamHandler()
-root_logger.addHandler(stream_handler)
+logger.addHandler(stream_handler)
 
 def init_db():
     with sqlite3.connect(app.config['TODO_DB']) as conn:
@@ -53,4 +55,3 @@ def main():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
